@@ -1,6 +1,14 @@
 <template>
   <div class="part" :class='position'>
+    <router-link :to="{
+      name: 'Parts',
+      params: {
+          id: this.selectedPart.id,
+          partType: this.selectedPart.type,
+      }
+      }">
     <img :src="selectedPart.src" title="arm"/>
+    </router-link>
     <button @click="selectPreviousPart()" class="prev-selector"></button>
     <button @click="selectNextPart()" class="next-selector"></button>
     <span class="sale" v-show="selectedPart.onSale">Sale!</span>
@@ -8,6 +16,7 @@
 </template>
 
 <script>
+import PartInfo from '../parts/PartInfo.vue';
 
 function getPreviousValidIndex(index, length) {
   const deprecatedIndex = index - 1;
@@ -18,7 +27,8 @@ function getNextValidIndex(index, length) {
   return incrementedIndex > length - 1 ? 0 : incrementedIndex;
 }
 export default {
-  name: 'partSelecter',
+  name: 'PartSelecter',
+  components: PartInfo,
   props: {
     parts: {
       type: Array,
@@ -94,6 +104,7 @@ export default {
 }
 .part img {
   width:165px;
+  cursor: pointer;
 }
 .top {
   border-bottom: none;

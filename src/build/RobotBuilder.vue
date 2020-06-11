@@ -1,5 +1,5 @@
 <template>
-  <div class='content'>
+  <div v-if="availableParts" class='content'>
     <div class="preview">
        <CollapsibleSection>
       <div class="preview-content">
@@ -49,38 +49,33 @@
         @partSelected='part => selectedRobot.base=part'/>
       </div>
     </div>
-    <div>
-      <h1>cart</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Robot</th>
-            <th class="cost">Cost</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for='(robot, index) in cart' :key='index'>
-            <td>{{ robot.head.title }}</td>
-            <td class="cost">{{ robot.cost }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
   </div>
 
 </template>
 
 <script>
-import availableParts from '../data/parts';
-import PartSelecter from './partSelecter.vue';
+import PartSelecter from './PartSelecter.vue';
 import CollapsibleSection from '../shared/CollapsibleSection.vue';
 
 export default {
+  beforeRouteLeave(to, from, next) {
+    if (this.addedToCart) {
+      next(true);
+    } else {
+      /* eslint no-alert: 0 */
+      /* eslint no-restricted-globals: 0 */
+      const response = confirm('You have not added your robot to your cart. Are you sure you want to leave this page ?');
+      next(response);
+    }
+  },
+  created() {
+    this.$store.dispatch('getParts');
+  },
   name: 'RobotBuilder',
   components: { PartSelecter, CollapsibleSection },
   data() {
     return {
-      availableParts,
+      addedToCart: false,
       cart: [],
       selectedRobot: {
         head: {},
@@ -92,6 +87,9 @@ export default {
     };
   },
   computed: {
+    availableParts() {
+      return this.$store.state.parts;
+    },
     headBorderStyle() {
       return {
         border: this.selectedRobot.head.onSale
@@ -99,9 +97,6 @@ export default {
           : '3px solid grey',
       };
     },
-  },
-  created() {
-    console.log(this.selectedRobot);
   },
   methods: {
     addToCart() {
@@ -111,8 +106,8 @@ export default {
           + robot.torso.cost
           + robot.base.cost
           + robot.head.cost;
-      console.log(this.selectedRobot);
-      this.cart.push({ ...robot, cost });
+      this.$store.commit('addRobotToCart', { ...robot, cost }); // ajout du robot au store
+      this.addedToCart = true;
     },
     /*    handleHeadSelectedPart(part) {
       this.selectedRobot.head = part;
@@ -248,15 +243,6 @@ export default {
   padding:3px;
   font-size:16px;
 }
-td, th{
-  text-align: left;
-  padding: 5px;
-  padding-right: 20px;
-}
-.cost{
-  text-align: right;
-}
-
 .sale-border{
   border: red solid 3px;
 }
