@@ -69,7 +69,7 @@ export default {
     }
   },
   created() {
-    this.$store.dispatch('getParts');
+    this.$store.dispatch('robots/getParts');
   },
   name: 'RobotBuilder',
   components: { PartSelecter, CollapsibleSection },
@@ -88,7 +88,7 @@ export default {
   },
   computed: {
     availableParts() {
-      return this.$store.state.parts;
+      return this.$store.state.robots.parts;
     },
     headBorderStyle() {
       return {
@@ -106,7 +106,8 @@ export default {
           + robot.torso.cost
           + robot.base.cost
           + robot.head.cost;
-      this.$store.commit('addRobotToCart', { ...robot, cost }); // ajout du robot au store
+      this.$store.dispatch('robots/addRobotToCart', { ...robot, cost })
+        .then(() => this.$router.push('/cart')); // renvoie vers l'url cart
       this.addedToCart = true;
     },
     /*    handleHeadSelectedPart(part) {
